@@ -68,26 +68,25 @@ public class Responder {
      * into our response map.
      */
     private void fillResponseMap() {
-        // This is super locked-in for the specific file.
-        // Any edge case would immediately break it.
-        // TODO: fix this.
         try(BufferedReader reader = Files.newBufferedReader(Paths.get(FILE_OF_MAP_RESPONSES), Charset.forName("US-ASCII"))) {
             String line;
             while((line = reader.readLine()) != null) {
-                String[] keys;
-                String temp = line.trim();
-                if(temp.isEmpty()) {
+                line = line.trim();
+                if(line.isEmpty()) {
                     continue;
                 }
-                if(temp.contains(",") || temp.split(" ").length == 1) {
-                    keys = temp.split(",");
-                    temp = reader.readLine();
-                    for(String key : keys) {
-                        key = key.trim();
-                        responseMap.put(key, temp);
-                    }
+                String[] keys = line.split(",");
+                String response = reader.readLine();
+                if(response == null) {
+                    // Should never happen, but it's fine.
+                    throw new NoSuchElementException("Response missing for keys: " + line);
+                }
+                for(String key : keys) {
+                    key = key.trim();
+                    responseMap.put(key, response);
                 }
             }
+            // Sanity checks again:
             System.out.println("SIZE: " + responseMap.size());
             for(String key : responseMap.keySet()) {
                 System.out.println(key + ": " + responseMap.get(key));
@@ -122,7 +121,7 @@ public class Responder {
                 }
                 defaultResponses.add(str);
             }
-            //sanity checks
+            // Sanity checks
             System.out.println("SIZE: " + defaultResponses.size());
             for (int i = 0; i < defaultResponses.size(); i++) {
                 System.out.println(i + ": " + defaultResponses.get(i));
